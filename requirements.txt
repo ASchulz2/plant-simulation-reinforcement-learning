@@ -1,0 +1,8 @@
+numpy==2.4.4
+torch==2.13.0
+matplotlib==3.11.1
+pywin32==312
+python-dotenv==1.2.4
+
+# Development and testing
+pytest==9.1.1

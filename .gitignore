@@ -1,0 +1,33 @@
+
+# Local environment configuration
+.env
+
+# Python environments
+.venv/
+venv/
+ProjektEnv/
+
+# Python cache and test artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+
+# Training checkpoints and serialized policies
+checkpoint/
+saved_policy/
+*.pkl
+*.pth
+*.pt
+
+# Generated experiment results
+results/
+*.log
+
+# Plant Simulation backups
+*.spp.bak
+*.bak
