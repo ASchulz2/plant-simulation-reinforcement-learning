@@ -25,8 +25,12 @@ saved_policy/
 *.pt
 
 # Generated experiment results
-results/
-*.log
+results/*
+!results/tabular_q_learning_pure/
+results/tabular_q_learning_pure/*
+!results/tabular_q_learning_pure/*.png
+!results/tabular_q_learning_pure/*.pdf
+!results/tabular_q_learning_pure/*.svg
 
 # Plant Simulation backups
 *.spp.bak
