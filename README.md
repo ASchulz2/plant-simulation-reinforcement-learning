@@ -117,8 +117,6 @@ Run the complete test suite from the project root:
 pytest -v
 ```
 
-The current implementation passes **536 tests**.
-
 The test suite covers, among other things:
 
 - Simulation interface and environment behavior
@@ -452,3 +450,135 @@ The evaluation currently covers one episode and should therefore be interpreted 
 The training and evaluation workflows generate plots to inspect learning behavior, throughput, decision counts, emptying-event statistics, simulation time, and learned Q-values.
 
 These visualizations complement the aggregate metrics by showing episode-level variation and the distribution of learned action values.
+
+## Experimental Results
+
+### Training
+
+The tabular Q-learning agent was trained for 10 episodes using the experiment configuration described above. The training run achieved a mean throughput of 1,000 MUs per episode, corresponding to the configured target throughput.
+
+| Metric | Result |
+|---|---:|
+| Training episodes | 10 |
+| Mean episode reward | 2,807.5 |
+| Mean throughput | 1,000 MUs |
+| Total decision points | 27,975 |
+| Total emptying events | 2,077 |
+| Total MUs processed through emptying events | 14,164 |
+| Mean MUs per emptying event | 6.82 |
+| Distinct visited states | 25,203 |
+| Distinct visited state-action pairs | 25,224 |
+
+The observed action distribution was:
+
+| Action | Selections | Relative frequency |
+|---|---:|---:|
+| Storage A | 9,256 | 33.09% |
+| Storage B | 4,955 | 17.71% |
+| Return | 13,764 | 49.20% |
+| **Total** | **27,975** | **100.00%** |
+
+#### Training metrics
+
+The following figures show the episode-level behavior during training.
+
+**Decision points per episode**
+
+![Decision points per episode](results/tabular_q_learning_pure/decision_points.png)
+
+[PDF version](results/tabular_q_learning_pure/decision_points.pdf)
+
+The number of decisions required to complete an episode varies across the training run. No consistent downward trend is apparent over these ten episodes.
+
+**Throughput per episode**
+
+![Throughput per episode](results/tabular_q_learning_pure/throughput.png)
+
+[PDF version](results/tabular_q_learning_pure/throughput.pdf)
+
+The agent consistently reaches the target throughput of 1,000 MUs. This demonstrates that the manufacturing objective is achieved throughout the reported training run.
+
+**Mean MUs per emptying event**
+
+![Mean MUs per emptying event](results/tabular_q_learning_pure/mean_emptying_count.png)
+
+[PDF version](results/tabular_q_learning_pure/mean_emptying_count.pdf)
+
+This metric describes the average number of material units processed per emptying event and provides an indication of storage utilization.
+
+**Simulation time per episode**
+
+![Simulation time per episode](results/tabular_q_learning_pure/simulation_time.png)
+
+[PDF version](results/tabular_q_learning_pure/simulation_time.pdf)
+
+Simulation time varies between episodes, reflecting differences in the number of decisions and the resulting manufacturing-system behavior. The values are expressed in the simulation model's time units.
+
+**Total reward per episode**
+
+![Total reward per episode](results/tabular_q_learning_pure/total_reward.png)
+
+[PDF version](results/tabular_q_learning_pure/total_reward.pdf)
+
+The reward curve is closely related to the number of decisions per episode. Under the current reward configuration, each feasible decision contributes +1 and successful termination contributes +10. Consequently, the total episode reward is directly determined by the number of decisions plus the terminal success bonus. It should therefore not be interpreted as an independent measure of learning progress.
+
+### Greedy policy evaluation
+
+After training, the saved checkpoint was restored and evaluated using a greedy policy with exploration disabled (`epsilon = 0`).
+
+The evaluation completed one episode successfully and reached the target throughput.
+
+| Metric | Result |
+|---|---:|
+| Evaluation episodes | 1 |
+| Episode outcome | Success |
+| Throughput | 1,000 MUs |
+| Total reward | 3,195 |
+| Decision points | 3,185 |
+| Simulation time | 38,683.78 |
+| Emptying events | 256 |
+| MUs processed through emptying events | 1,595 |
+| Mean MUs per emptying event | 6.23 |
+| Distinct visited states | 2,899 |
+| Distinct visited state-action pairs | 2,899 |
+
+The greedy policy's action distribution was:
+
+| Action | Selections | Relative frequency |
+|---|---:|---:|
+| Storage A | 1,008 | 31.65% |
+| Storage B | 589 | 18.49% |
+| Return | 1,588 | 49.86% |
+| **Total** | **3,185** | **100.00%** |
+
+#### Learned Q-values
+
+The restored Q-table can be examined through the following visualizations.
+
+**Top 20 learned state-action values**
+
+![Top 20 learned state-action values](results/tabular_q_learning_pure/learned_top_q_values.png)
+
+[PDF version](results/tabular_q_learning_pure/learned_top_q_values.pdf)
+
+The figure displays state-action pairs with the largest learned Q-values. It provides an overview of the action preferences represented in the sparse Q-table.
+
+**Action values for an encountered state**
+
+![Action values for an encountered state](results/tabular_q_learning_pure/learned_q_values.png)
+
+[PDF version](results/tabular_q_learning_pure/learned_q_values.pdf)
+
+This visualization compares the stored Q-values of the available actions for one state encountered during evaluation. It provides a more detailed view of an individual policy decision.
+
+### Discussion
+
+The greedy evaluation achieved the target throughput without further Q-value updates. Its action distribution was similar to the aggregate distribution observed during training, with the Return action remaining the most frequently selected action.
+
+The evaluation also visited 2,899 distinct states and state-action pairs, illustrating the variety of decisions encountered during a single episode.
+
+The training and evaluation rewards should not be compared directly as measures of policy improvement: they correspond to episodes with different numbers of decision points. Under the current reward configuration, the total reward is directly linked to the episode length.
+
+The evaluation currently covers one episode and should therefore be interpreted as an initial assessment of the learned policy rather than a statistically robust estimate of its performance. Additional evaluation episodes are needed to assess the consistency and robustness of the learned policy.
+
+The results demonstrate a functioning integration of tabular Q-learning with a discrete-event manufacturing simulation, including sparse state-action value storage, feasible action selection, checkpoint restoration, and independent greedy policy evaluation.
