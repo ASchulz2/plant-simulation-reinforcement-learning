@@ -915,6 +915,8 @@ def test_success_terminal_sets_reason_and_passes_events() -> None:
 
     assert environment.running is False
 
+    assert environment.step_count == 1
+
     plant.stop_simulation.assert_called_once()
 
     emptying_event_reader.read.assert_called_once()

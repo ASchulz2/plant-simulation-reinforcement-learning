@@ -808,6 +808,9 @@ class PlantEnvironment:
                 ),
             )
 
+        # Count the completed terminal RL decision.
+        self._step_count += 1
+
         # --------------------------------------------------------------
         # Read final semantic observation.
         # --------------------------------------------------------------
